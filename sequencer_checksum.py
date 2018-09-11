@@ -5,7 +5,7 @@ import time # for sleep
 import Tkinter # to open a window/message box
 import tkMessageBox
 import threading # to run a function in the background
-import automate_demultiplex_config as config
+import integrity_checking_config as config
 
 class Nextseq_Integrity_Check():
 	def __init__(self):
