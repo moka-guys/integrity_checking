@@ -38,18 +38,18 @@ class Nextseq_Integrity_Check():
 		# checksums match
 		self.checksum_match = False
 
-		# if testing, overwrite the paths to that of the testing folders (currently on a USB stick)
+		# if testing, overwrite the paths to that of the testing folders 
 		if config.debug:
-			# drive letter given to usb stick
-			self.mapped_drive = "E:\\"
+			# example run folders that can be used to test the script are within this repo. However to enable this to be tested on multiple machines need to capture the path to this script.
+			self.mapped_drive = os.path.dirname(os.path.realpath(__file__))
 			# path to the fake nextseqtemp folder
-			self.nextseqtemp_folder = self.mapped_drive + "integrity_testing\\sequencer_temp"
+			self.nextseqtemp_folder = self.mapped_drive + "\\testing_data\\sequencer_temp"
 			# path to the fake workstation folder
-			self.mapped_workstation_folder = self.mapped_drive + "integrity_testing\\workstation"
+			self.mapped_workstation_folder = self.mapped_drive + "\\testing_data\\workstation"
 			# path to the fake checksums_inprogress folder
-			self.checksum_in_progress = self.mapped_drive + "integrity_testing\\checksums_inprogress"	
+			self.checksum_in_progress = self.mapped_drive + "\\testing_data\\checksums_inprogress"	
 			# path to the fake run in progress folder
-			self.run_in_progress = self.mapped_drive + "integrity_testing\\run_inprogress"
+			self.run_in_progress = self.mapped_drive + "\\testing_data\\run_inprogress"
 
 	def look_for_folder(self):
 		"""
