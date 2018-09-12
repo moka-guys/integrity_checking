@@ -8,7 +8,7 @@ Variables defined in this module are required by sequencer_checksum.py.
 debug = False
 
 # =====git release for the github repo=====
-script_release = "v21.0"
+script_release = "v22.0"
 
 # ================ Integrity check
 # the filename which holds the checksum results
