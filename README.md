@@ -16,8 +16,10 @@ The final checksums are written to file within the runfolder on the workstation,
 A pass or fail alert is also displayed on the sequencer to prevent further use of the sequencer before the integrity of the run is re-assessed.
 
 ## How to perform testing
-When running with debug = true the script uses the workstation and sequencer_temp folders in this folder as mock runfolders.
+When running with debug = true the script uses the workstation and sequencer_temp folders in the testing_data folder as mock runfolders.
+
 These folders contain quite a few files.
+
 Debug mode also prints extra info to screen including some instruction, however to see this it must be run from the command line, not task scheduler.
 
 On the sequencers Python lives in C://ProgramData/Miniconda (or something like this) - the ProgramData folder is hidden so you need to type it in.
