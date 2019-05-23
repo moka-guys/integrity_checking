@@ -1,0 +1,3 @@
+Checksums match after 4 hours
+workstation checksum (E:\integrity_testing\workstation\run100)=70607b414f9ed30a8c1e48d027d1f4ac
+sequencer checksum (E:\integrity_testing\sequencer_temp\run100)=70607b414f9ed30a8c1e48d027d1f4ac

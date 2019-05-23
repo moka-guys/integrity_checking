@@ -1,0 +1,3 @@
+workstation checksum (Z:\180124_NB551068_0096_AHWK7YBGX3)=729797f0cfd0dbd16846f53085069d93
+sequencer checksum (D:\Illumina\NextSeq Control Software Temp\180124_NB551068_0096_AHWK7YBGX3)=729797f0cfd0dbd16846f53085069d93
+Checksum result reported

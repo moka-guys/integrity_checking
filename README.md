@@ -14,3 +14,20 @@ As the data may still be in the process of being transferred for a few hours aft
 The final checksums are written to file within the runfolder on the workstation, which enables the demultiplexing script to assess the checksums and create a alert should the integrity test fail or demultiplex the run.
 
 A pass or fail alert is also displayed on the sequencer to prevent further use of the sequencer before the integrity of the run is re-assessed.
+
+## How to perform testing
+When running with debug = true the script uses the workstation and sequencer_temp folders in the testing_data folder as mock runfolders.
+
+These folders contain quite a few files.
+
+Debug mode also prints extra info to screen including some instruction, however to see this it must be run from the command line, not task scheduler.
+
+On the sequencers Python lives in C://ProgramData/Miniconda (or something like this) - the ProgramData folder is hidden so you need to type it in.
+
+The RunInfo.xml has been moved out of the dummy workstation runfolder which should result in a failed integrity test. 
+The script waits 15 seconds and the debug messages prompt you to move the missing file(s) back into the runfolder.
+The test should then pass.
+
+After testing:
+Move the RunInfo.xml file back out of the run folder for future testing.
+Remember to turn debug back to False.
