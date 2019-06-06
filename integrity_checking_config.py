@@ -3,9 +3,6 @@ integrity_checking configuration script.
 
 Variables defined in this module are required by sequencer_checksum.py.
 """
-# Set debug mode
-debug = True
-#debug = False
 
 # =====git release for the github repo=====
 script_release = "v23.0"
