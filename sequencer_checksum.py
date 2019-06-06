@@ -6,6 +6,7 @@ import Tkinter # to open a window/message box
 import tkMessageBox
 import threading # to run a function in the background
 import integrity_checking_config as config
+import argparse
 
 class Nextseq_Integrity_Check():
 	def __init__(self):
@@ -38,8 +39,12 @@ class Nextseq_Integrity_Check():
 		# checksums match
 		self.checksum_match = False
 
+		# variable to hold debug status
+		self.debug = False
+	
+	def debug_mode(self):
 		# if testing, overwrite the paths to that of the testing folders 
-		if config.debug:
+		if self.debug:
 			print "debug on"
 			# example run folders that can be used to test the script are within this repo. However to enable this to be tested on multiple machines need to capture the path to this script.
 			self.mapped_drive = os.path.dirname(os.path.realpath(__file__))
@@ -68,9 +73,9 @@ class Nextseq_Integrity_Check():
 		# for each runfolder in temp folder
 		for temp_runfolder in os.listdir(self.nextseqtemp_folder):
 			# if the run has not already been monitored by this script OR it's a testing run
-			if temp_runfolder not in os.listdir(self.run_in_progress) or config.debug:
+			if temp_runfolder not in os.listdir(self.run_in_progress) or self.debug:
 				# if testing print message
-				if config.debug:
+				if self.debug:
 					print "testing run skipping test to see if run already being monitored"
 
 			
@@ -148,7 +153,7 @@ class Nextseq_Integrity_Check():
 			# check the run has finished and transferred (presence of RTA_complete in the runfolder and on workstation)
 			if self.RTA_complete in os.listdir(self.sequencer_runfolder) and self.RTA_complete in os.listdir(self.workstation_runfolder):
 					# if it's a testing run print a message
-					if config.debug:
+					if self.debug:
 						print "run finished - skipping integrity_check_first_wait"
 					else:
 						# wait the number of hours defined in config file to ensure all file transfers are done
@@ -162,14 +167,14 @@ class Nextseq_Integrity_Check():
 			# if run has not finished 
 			else:
 				# if a testing run, wait 20 seconds and print a message
-				if config.debug:
+				if self.debug:
 					print "waiting 20 seconds for sequencing and data transfer to finish"
 					time.sleep(20)
 				# if not testing wait longer
 				else:
 					# wait 10 minutes
 					time.sleep(600)
-		if config.debug:
+		if self.debug:
 			print "checksums done"
 			
 
@@ -178,12 +183,12 @@ class Nextseq_Integrity_Check():
 		The checksums are calculated by this script.
 		This function checks the runfolder has not already been checksummed, marks the folder as being checksummed and then calls the function to generate the checksums.
 		"""
-		if config.debug:
+		if self.debug:
 			print "in prepare_checksum_calculations"
 		# create name for file to denote checksum in progress
 		checksum_in_progress_file=self.runfolder+".txt"
 		# check integrity check has not already been calculated, or isn't currently being calculated and it isn't a testing run.
-		if not config.debug and self.output_file not in os.listdir(self.workstation_runfolder) and checksum_in_progress_file not in os.listdir(self.checksum_in_progress):
+		if not self.debug and self.output_file not in os.listdir(self.workstation_runfolder) and checksum_in_progress_file not in os.listdir(self.checksum_in_progress):
 			# create a file to denote checksum in progress
 			with open(os.path.join(self.checksum_in_progress,checksum_in_progress_file),'w') as checksum_in_progress_file_path:
 				# create a timestamp
@@ -194,7 +199,7 @@ class Nextseq_Integrity_Check():
 			# call function to generate checksum for workstation and sequencer runfolders
 			self.run_integrity_check()
 		# if a test run print statement to explain stopping
-		elif config.debug:
+		elif self.debug:
 			print "checksums already generated but as testing continuing anyway"
 				# create a file to denote checksum in progress
 			with open(os.path.join(self.checksum_in_progress,checksum_in_progress_file),'w') as checksum_in_progress_file_path:
@@ -214,7 +219,7 @@ class Nextseq_Integrity_Check():
 		It looks for the presense of any files which should be ignored as they are not copied from temp to output.
 		The checksums are written to a file on the workstation for the demultiplexing script.
 		"""
-		if config.debug:
+		if self.debug:
 			print "starting integrity checking"
 
 		# set a count for max number of attempts at checksum (one test per hour)
@@ -227,7 +232,7 @@ class Nextseq_Integrity_Check():
 			sequencer_checksum = dirhash(self.sequencer_runfolder, 'md5', excluded_files = config.exclude)
 			
 			# if testing print checksums
-			if config.debug:
+			if self.debug:
 				print "workstation checksum = " + workstation_checksum
 				print "sequencer checksum = " + sequencer_checksum	   
 
@@ -244,7 +249,7 @@ class Nextseq_Integrity_Check():
 				count += 1
 				
 				# if testing skip the wait
-				if config.debug:
+				if self.debug:
 					print "moving files back into workstation runfolder. Integrity test will be repeated in 30 seconds..."
 					
 					# move files back into folder to make integrity test pass
@@ -289,7 +294,7 @@ class Nextseq_Integrity_Check():
 		#create output file
 		with open(os.path.join(self.workstation_runfolder, config.missing_files_output), 'w') as outputfile:
 
-      # set flag so header only reported first time
+	  # set flag so header only reported first time
 			workstation_missing = False
 			# loop through the tempfolder
 			for root, subfolder, files in os.walk(os.path.join(self.nextseqtemp_folder, self.runfolder)):
@@ -309,8 +314,8 @@ class Nextseq_Integrity_Check():
 							workstation_missing = True
 						# print the path to the extra file
 						outputfile.write(path)
-      
-      		# repeat looking for files on workstation that aren't on sequencer
+	  
+	  		# repeat looking for files on workstation that aren't on sequencer
 			sequencer_missing = False
 			# loop through all files on workstation runfolder 
 			for root, subfolder, files in os.walk(os.path.join(self.mapped_workstation_folder,self.runfolder)):
@@ -330,10 +335,19 @@ class Nextseq_Integrity_Check():
 							sequencer_missing = True
 						# print the path to the extra file
 						outputfile.write(path)
-              
+			  
 
 def main():
 	md5=Nextseq_Integrity_Check()
+	# Define arguments.
+	parser = argparse.ArgumentParser()
+	# add debug argument which is set to true if argument given.
+	parser.add_argument('--debug', action='store_true', help="Turn debug mode on.")
+	# parse arguments and set debug variable in class to debug
+	md5.debug = parser.parse_args().debug
+	# set debug paths
+	md5.debug_mode()
+	# start integrity checking
 	md5.look_for_folder()
 	
 if __name__ =="__main__":

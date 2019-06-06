@@ -16,18 +16,8 @@ The final checksums are written to file within the runfolder on the workstation,
 A pass or fail alert is also displayed on the sequencer to prevent further use of the sequencer before the integrity of the run is re-assessed.
 
 ## How to perform testing
-When running with debug = true (config file) the script uses the workstation and sequencer_temp folders in the testing_data folder as mock runfolders.
+To run in debug mode run the command add the command --debug to the command line. Running in debug mode uses the workstation and sequencer_temp folders in the testing_data folder as mock runfolders. These folders contain quite a few files but checksums are calculated quickly. The script automatically moves files out of the workstation run folder (moved files are specified in the config script config.files_to_move) which should cause the integrity check to fail. The script waits 30 seconds and then moves the file(s) back which should then result in a successful test.
 
-These folders contain quite a few files but checksums are calculated quickly.
-
-Debug mode also prints extra info to screen including some instruction, however to see this it must be run from the command line, not task scheduler.
+Debug mode prints extra info to screen including some instruction, however to see this it must be run from the command line, not task scheduler.
 
 On the sequencers Python lives in C://ProgramData/Miniconda2 - the ProgramData folder is hidden.
-
-The script moves files specified in the config script (files_to_move) out of the dummy workstation runfolder which should result in a failed integrity test. 
-The script waits 30 seconds before moving the missing file(s) back into the runfolder.
-The test is then repeated (and should pass).
-
-
-After testing:
-Remember to set debug == False (config file).
