@@ -1,4 +1,4 @@
-# integrity_checking v22.0
+# integrity_checking v23.0
 
 # calculate_nextseq_checksums.py
 This script is used to display a message box on the sequencers, with the goal of ensuring data is not lost (eg. by setting off another run) should the data integrity check fail. 
@@ -24,11 +24,10 @@ Debug mode also prints extra info to screen including some instruction, however 
 
 On the sequencers Python lives in C://ProgramData/Miniconda2 - the ProgramData folder is hidden.
 
-The RunInfo.xml has been moved out of the dummy workstation runfolder which should result in a failed integrity test. 
-The script waits 15 seconds and the debug messages prompt you to move the missing file(s) back into the runfolder.
-The test should then pass.
+The script moves files specified in the config script (files_to_move) out of the dummy workstation runfolder which should result in a failed integrity test. 
+The script waits 30 seconds before moving the missing file(s) back into the runfolder.
+The test is then repeated (and should pass).
 
 
 After testing:
-Move the RunInfo.xml file back out of the run folder for future testing.
 Remember to set debug == False (config file).

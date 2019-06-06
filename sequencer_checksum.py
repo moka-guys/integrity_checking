@@ -40,6 +40,7 @@ class Nextseq_Integrity_Check():
 
 		# if testing, overwrite the paths to that of the testing folders 
 		if config.debug:
+			print "debug on"
 			# example run folders that can be used to test the script are within this repo. However to enable this to be tested on multiple machines need to capture the path to this script.
 			self.mapped_drive = os.path.dirname(os.path.realpath(__file__))
 			# path to the fake nextseqtemp folder
@@ -50,6 +51,11 @@ class Nextseq_Integrity_Check():
 			self.checksum_in_progress = self.mapped_drive + "\\testing_data\\checksums_inprogress"	
 			# path to the fake run in progress folder
 			self.run_in_progress = self.mapped_drive + "\\testing_data\\run_inprogress"
+			
+			# move files out of folder to make integrity test fail
+			for file in config.files_to_move:
+				print "moving " + self.mapped_drive + "\\testing_data\\workstation\\run100\\" + file + " to " +  self.mapped_drive + "\\testing_data\\workstation\\" + file
+				os.rename(self.mapped_drive + "\\testing_data\\workstation\\run100\\" + file, self.mapped_drive + "\\testing_data\\workstation\\" + file)
 
 	def look_for_folder(self):
 		"""
@@ -239,8 +245,14 @@ class Nextseq_Integrity_Check():
 				
 				# if testing skip the wait
 				if config.debug:
-					print "waiting 15 seconds... change the runfolder now!"
-					time.sleep(15)
+					print "moving files back into workstation runfolder. Integrity test will be repeated in 30 seconds..."
+					
+					# move files back into folder to make integrity test pass
+					for file in config.files_to_move:
+						print "moving " + self.mapped_drive + "\\testing_data\\workstation\\" + file + " to " + self.mapped_drive + "\\testing_data\\workstation\\run100\\" + file
+						os.rename(self.mapped_drive + "\\testing_data\\workstation\\" + file, self.mapped_drive + "\\testing_data\\workstation\\run100\\" + file)
+						
+					time.sleep(30)
 				else:
 					# wait the number of hours defined in config file
 					time.sleep(config.integrity_check_repeat_wait * 3600)
