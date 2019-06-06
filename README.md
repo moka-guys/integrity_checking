@@ -1,4 +1,4 @@
-# integrity_checking v22.0
+# integrity_checking v23.0
 
 # calculate_nextseq_checksums.py
 This script is used to display a message box on the sequencers, with the goal of ensuring data is not lost (eg. by setting off another run) should the data integrity check fail. 
@@ -16,19 +16,13 @@ The final checksums are written to file within the runfolder on the workstation,
 A pass or fail alert is also displayed on the sequencer to prevent further use of the sequencer before the integrity of the run is re-assessed.
 
 ## How to perform testing
-When running with debug = true (config file) the script uses the workstation and sequencer_temp folders in the testing_data folder as mock runfolders.
+Running in debug mode will simulate an integrity check, using data stored within this repository. It will simulate a failed test and then a passed test.
+To run in debug mode provide the --debug command line option. 
+Running in debug mode uses the workstation and sequencer_temp folders in the testing_data folder as mock runfolders. These folders contain quite a few files but checksums are calculated quickly. 
+The script moves files out of the workstation run folder (moved files are specified in the config script config.files_to_move) which should cause the integrity check to fail - NB at this stage the checksums are printed to stdout, the result is not displayed in the pop up box. The script waits 30 seconds and then moves the file(s) back which should then result in a successful test (checksums printed to stdout, but this time the popup box will display successful test and script will finish).
 
-These folders contain quite a few files but checksums are calculated quickly.
-
-Debug mode also prints extra info to screen including some instruction, however to see this it must be run from the command line, not task scheduler.
+Debug mode prints extra info to screen including some instruction, however to see this it must be run from the command line, not task scheduler.
 
 On the sequencers Python lives in C://ProgramData/Miniconda2 - the ProgramData folder is hidden.
 
-The RunInfo.xml has been moved out of the dummy workstation runfolder which should result in a failed integrity test. 
-The script waits 15 seconds and the debug messages prompt you to move the missing file(s) back into the runfolder.
-The test should then pass.
-
-
-After testing:
-Move the RunInfo.xml file back out of the run folder for future testing.
-Remember to set debug == False (config file).
+When performing testing ensure the checksums are different first time around, and then are the same when the test passes. Any errors will need further debugging.
