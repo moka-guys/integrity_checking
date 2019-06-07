@@ -23,7 +23,7 @@ max_number_of_attempts = 10
 # list of files which differ between temp and output
 missing_files_output = "missing_files.txt"
 # files to exclude from integrity check
-exclude = ["RTAStart.bat", "CorrectedIntMetrics.bin", "EmpiricalPhasingMetrics.bin", "ErrorMetrics.bin", "EventMetrics.bin", "ExtractionMetrics.bin", "PFGridMetrics.bin", "QMetrics.bin", "RegistrationMetrics.bin", "TileMetrics.bin", "AlignmentMetrics.bin", "BasecallingMetrics.bin", "ExtendedTileMetrics.bin", "FWHMGridMetrics.bin", "ImageMetrics.bin", "QGridMetrics.bin", "000_000_000_na_rtabat.trans", "FilesAdded.csv", "FilesCopied.csv", "demultiplexlog.txt", "DNANexus_upload_started.txt", "md5checksum.txt", missing_files_output]
+exclude = ["RTAStart.bat", "CorrectedIntMetrics.bin", "EmpiricalPhasingMetrics.bin", "ErrorMetrics.bin", "EventMetrics.bin", "ExtractionMetrics.bin", "PFGridMetrics.bin", "QMetrics.bin", "RegistrationMetrics.bin", "TileMetrics.bin", "AlignmentMetrics.bin", "BasecallingMetrics.bin", "ExtendedTileMetrics.bin", "FWHMGridMetrics.bin", "ImageMetrics.bin", "QGridMetrics.bin", "000_000_000_na_rtabat.trans", "FilesAdded.csv", "FilesCopied.csv", "demultiplexlog.txt", "DNANexus_upload_started.txt", "CopyComplete.txt", "md5checksum.txt", missing_files_output]
 # files to move as part of automated testing
 files_to_move = ["RunInfo.xml"]
 
