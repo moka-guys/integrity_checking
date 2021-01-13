@@ -34,7 +34,7 @@ if nextseq:
 elif novaseq:
     include = ["InterOp","Thumbnail_Images","Data"]
     sequencer_temp_folder = "Z:\\outputfolder"
-    mapped_workstation_folder = "F:\\"
+    mapped_workstation_folder = "Y:\\"
 # ===== Testing =====
 # files to move as part of automated testing
 files_to_move = ["RunInfo.xml"]
