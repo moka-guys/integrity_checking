@@ -1,9 +1,9 @@
-# integrity_checking v23.0
+# integrity_checking v24.0
 
-# calculate_nextseq_checksums.py
+## calculate_nextseq_checksums.py
 This script is used to display a message box on the sequencers, with the goal of ensuring data is not lost (eg. by setting off another run) should the data integrity check fail. 
 
-This script is designed to be run on a NextSeq (not compatible with MiSeq). 
+This script is designed to be run on a NextSeq or NovaSeq (not currently compatible with MiSeq). 
 
 The script identifies when a run has started and opens a message box asking for users not to do anything on the sequencer until the integrity check has been performed.
 
@@ -15,14 +15,23 @@ The final checksums are written to file within the runfolder on the workstation,
 
 A pass or fail alert is also displayed on the sequencer to prevent further use of the sequencer before the integrity of the run is re-assessed.
 
+
 ## How to perform testing
-Running in debug mode will simulate an integrity check, using data stored within this repository. It will simulate a failed test and then a passed test.
+### debug_mode
 To run in debug mode provide the --debug command line option. 
+
+Running in debug mode will simulate an integrity check, using data stored within this repository. It will simulate a failed test and then a passed test.
+
 Running in debug mode uses the workstation and sequencer_temp folders in the testing_data folder as mock runfolders. These folders contain quite a few files but checksums are calculated quickly. 
 The script moves files out of the workstation run folder (moved files are specified in the config script config.files_to_move) which should cause the integrity check to fail - NB at this stage the checksums are printed to stdout, the result is not displayed in the pop up box. The script waits 30 seconds and then moves the file(s) back which should then result in a successful test (checksums printed to stdout, but this time the popup box will display successful test and script will finish).
 
-Debug mode prints extra info to screen including some instruction, however to see this it must be run from the command line, not task scheduler.
-
-On the sequencers Python lives in C://ProgramData/Miniconda2 - the ProgramData folder is hidden.
-
 When performing testing ensure the checksums are different first time around, and then are the same when the test passes. Any errors will need further debugging.
+
+### no_min_wait
+The flag --no_min_wait can be provided to skip the first wait before ther checksums are calculated. This is useful when restarting after a failed integrity check.
+
+## How to run from cmdline
+A miniconda Python instance lives in C:\Users\sbsuser\miniconda2 (novaseq) or C://ProgramData/Miniconda2 (Nextseq) NB the ProgramData folder is hidden.
+
+## checksumdir
+Python package checksumdir v1.1.4 is used to calculate the md5 checksums (included in repo).
