@@ -10,25 +10,25 @@ import argparse
 
 class Sequencer_Integrity_Check():
 	def __init__(self):
-		
+
 		# temp folder on the nextseq
 		self.sequencer_temp_folder = config.sequencer_temp_folder
-			
+
 		# path to the mapped workstation share
 		self.mapped_workstation_folder = config.mapped_workstation_folder
-		
+
 		# the filename which denote sequencing has finished
 		self.RTA_complete = "RTAComplete.txt"
-		
+
 		# the file to write the checksums to
 		self.output_file = "md5checksum.txt"
-		
+
 		# folder containing files which denote checksum is being calculated
 		self.checksum_in_progress = "C:\\Users\\sbsuser\\integrity_check\\checksums_inprogress"
 
 		# folder containing files which denote checksum is being calculated
 		self.run_in_progress = "C:\\Users\\sbsuser\\integrity_check\\run_inprogress"
-		
+
 		# variable to hold the name of the runfolder
 		self.runfolder = ""
 
@@ -47,7 +47,7 @@ class Sequencer_Integrity_Check():
 
 		# dict to hold checksums
 		self.checksum_results = {}
-	
+
 	def debug_mode(self):
 		# if testing, overwrite the paths to that of the testing folders 
 		if self.debug:
@@ -62,11 +62,16 @@ class Sequencer_Integrity_Check():
 			self.checksum_in_progress = self.mapped_drive + "\\testing_data\\checksums_inprogress"	
 			# path to the fake run in progress folder
 			self.run_in_progress = self.mapped_drive + "\\testing_data\\run_inprogress"
-			
+
 			# move files out of folder to make integrity test fail
 			for file in config.files_to_move:
-				print "moving " + self.mapped_drive + "\\testing_data\\workstation\\run100\\" + file + " to " +  self.mapped_drive + "\\testing_data\\workstation\\" + file
-				os.rename(self.mapped_drive + "\\testing_data\\workstation\\run100\\" + file, self.mapped_drive + "\\testing_data\\workstation\\" + file)
+				if config.nextseq:
+					print "moving " + self.mapped_drive + "\\testing_data\\workstation\\run100\\" + file + " to " +  self.mapped_drive + "\\testing_data\\workstation\\" + file
+					os.rename(self.mapped_drive + "\\testing_data\\workstation\\run100\\" + file, self.mapped_drive + "\\testing_data\\workstation\\" + file)
+				elif config.novaseq:
+					for dir in config.include:
+						print "moving " + self.mapped_drive + "\\testing_data\\workstation\\run100\\" + dir + "\\" + file + " to " +  self.mapped_drive + "\\testing_data\\workstation\\" + dir + "_temp\\"  + file
+						os.rename(self.mapped_drive + "\\testing_data\\workstation\\run100\\" + dir + "\\" + file, self.mapped_drive + "\\testing_data\\workstation\\" + dir + "_temp\\" + file)
 
 	def look_for_folder(self):
 		"""
@@ -84,14 +89,14 @@ class Sequencer_Integrity_Check():
 				if self.debug:
 					print "testing run skipping test to see if run already being monitored"
 
-			
+
 				# assign run folder name
 				self.runfolder = temp_runfolder
 				# create a file to denote this run is being monitored
 				with open(os.path.join(self.run_in_progress,temp_runfolder),'w') as new_run_marker:
 					# write timestamp to file
 					new_run_marker.write(str(datetime.datetime.now()))
-				
+
 				# call function which opens a window to say run in progress - don't do anything until a message box appears denoting integrity check has been performed
 				# this function will close when the run ends and the checksum has been calculated
 				self.open_window()
@@ -101,14 +106,14 @@ class Sequencer_Integrity_Check():
 				if self.checksum_match:
 					# create root window which can then be hidden
 					root = Tkinter.Tk()
-					# hide 
+					# hide
 					root.withdraw()
 					tkMessageBox.showinfo("Integrity check complete","Integrity check passed")
 					# if checksums don't match (integrity test FAIL) return a error box
 				else:
 					# create root window which can then be hidden
 					root = Tkinter.Tk()
-					# hide 
+					# hide
 					root.withdraw()
 					tkMessageBox.showerror("Integrity check complete","Integrity check failed - please do not use this sequencer and inform the Bioinformatics team immediately")
 
@@ -123,9 +128,9 @@ class Sequencer_Integrity_Check():
 		window = Tkinter.Tk()
 		# set some properties of the message box
 		# message box size
-		window.minsize(width=666,height=66) 
+		window.minsize(width=666,height=66)
 		# message box title
-		window.title("%s - Integrity check not complete - please wait" % self.runfolder) 
+		window.title("%s - Integrity check not complete - please wait" % self.runfolder)
 		# create a label for inside the message box
 		label = Tkinter.Label(window, text = "Procesing %s\nPlease don't use this sequencer or close this window until a message box stating \"Integrity check passed\" is displayed"  % self.runfolder)
 		# display the label in the window
@@ -133,7 +138,7 @@ class Sequencer_Integrity_Check():
 		# using threading run the function run_has_finished which closes when the checksums have been generated
 		thread = threading.Thread(target = self.run_has_finished)
 		# start parallel computation
-		thread.start() 
+		thread.start()
 		# montior this thread
 		while thread.is_alive():
 			# update the window
@@ -167,13 +172,13 @@ class Sequencer_Integrity_Check():
 					else:
 						# wait the number of hours defined in config file to ensure all file transfers are done
 						time.sleep(config.integrity_check_first_wait * 3600)
-						
+
 					# call function which triggers the checksum calculations
 					self.prepare_checksum_calculations()
 					# now all checksums are done change flag to true so the loop finishes and the window is closed
 					finished = True
-			
-			# if run has not finished 
+
+			# if run has not finished
 			else:
 				# if a testing run, wait 20 seconds and print a message
 				if self.debug:
@@ -185,7 +190,7 @@ class Sequencer_Integrity_Check():
 					time.sleep(600)
 		if self.debug:
 			print "checksums done"
-			
+
 
 	def prepare_checksum_calculations(self):
 		"""
@@ -194,7 +199,7 @@ class Sequencer_Integrity_Check():
 		"""
 		if self.debug:
 			print "in prepare_checksum_calculations"
-		print "in prepare_checksum_calculations"
+
 		# create name for file to denote checksum in progress
 		checksum_in_progress_file = self.runfolder+".txt"
 		# check integrity check has not already been calculated, or isn't currently being calculated and it isn't a testing run.
@@ -220,7 +225,7 @@ class Sequencer_Integrity_Check():
 
 			# call function to generate checksum for workstation and sequencer runfolders
 			self.run_integrity_check()
-						
+
 
 	def run_integrity_check(self):
 		"""
@@ -233,7 +238,7 @@ class Sequencer_Integrity_Check():
 		"""
 		if self.debug:
 			print "starting integrity checking"
-		
+
 		print "starting integrity checking"
 		# set a count for max number of attempts at checksum (one test per hour)
 		count = 0
@@ -245,11 +250,11 @@ class Sequencer_Integrity_Check():
 				# calculate the md5 checksum for each runfolder, using the to_exclude list
 				self.checksum_results["workstation_checksum"] = dirhash(self.workstation_runfolder, 'md5', excluded_files = config.exclude) 
 				self.checksum_results["sequencer_checksum"] = dirhash(self.sequencer_runfolder, 'md5', excluded_files = config.exclude)
-				
+
 				# if testing print checksums
 				if self.debug:
 					print "workstation checksum = " + self.checksum_results["workstation_checksum"]
-					print "sequencer checksum = " + self.checksum_results["sequencer_checksum"]	   
+					print "sequencer checksum = " + self.checksum_results["sequencer_checksum"]
 
 				# see if the checksums match
 				if self.checksum_results["workstation_checksum"] == self.checksum_results["sequencer_checksum"]:
@@ -257,7 +262,7 @@ class Sequencer_Integrity_Check():
 					self.checksum_match = True
 					# increase count
 					count += 1
-			
+
 			if config.novaseq:
 				self.checksum_results = {"workstation":{},"sequencer":{}}
 				# run integrity check for one sub folder at a time
@@ -267,7 +272,7 @@ class Sequencer_Integrity_Check():
 					self.checksum_results["workstation"][directory] = dirhash(os.path.join(self.workstation_runfolder,directory), 'md5') 
 					self.checksum_results["sequencer"][directory] = dirhash(os.path.join(self.sequencer_runfolder,directory), 'md5')
 					print self.checksum_results
-				
+
 				# for the sub folder tested - check each match and count number of successful matches
 				matches = 0
 				for directory in config.include:
@@ -279,26 +284,31 @@ class Sequencer_Integrity_Check():
 					self.checksum_match = True
 					# increase count
 					count += 1
-			
-			# if checksums fail 
+
+			# if checksums fail
 			if not self.checksum_match:
 				# increase count
 				count += 1
-				
 				# if testing skip the wait
 				if self.debug:
 					print "moving files back into workstation runfolder. Integrity test will be repeated in 30 seconds..."
-					
 					# move files back into folder to make integrity test pass
-					for file in config.files_to_move:
-						print "moving " + self.mapped_drive + "\\testing_data\\workstation\\" + file + " to " + self.mapped_drive + "\\testing_data\\workstation\\run100\\" + file
-						os.rename(self.mapped_drive + "\\testing_data\\workstation\\" + file, self.mapped_drive + "\\testing_data\\workstation\\run100\\" + file)
-						
-					time.sleep(30)
+					if config.nextseq:
+						for file in config.files_to_move:
+							print "moving " + self.mapped_drive + "\\testing_data\\workstation\\" + file + " to " + self.mapped_drive + "\\testing_data\\workstation\\run100\\" + file
+							os.rename(self.mapped_drive + "\\testing_data\\workstation\\" + file, self.mapped_drive + "\\testing_data\\workstation\\run100\\" + file)
+					elif config.novaseq:
+						# move files back into folder to make integrity test pass
+						for dir in config.include:
+							for file in config.files_to_move:
+								print "moving " + self.mapped_drive + "\\testing_data\\workstation\\" + dir + "_temp\\" +  file + " to " + self.mapped_drive + "\\testing_data\\workstation\\run100\\" + dir + "\\" + file
+								os.rename(self.mapped_drive + "\\testing_data\\workstation\\" + dir + "_temp\\" + file, self.mapped_drive + "\\testing_data\\workstation\\run100\\" + dir + "\\" + file)
+						time.sleep(20)
+						count = config.max_number_of_attempts - 1
 				else:
 					# wait the number of hours defined in config file
 					time.sleep(config.integrity_check_repeat_wait * 3600)
-		
+
 		# report if integrity test has passed or failed after max number of tries
 		# write the checksums to the output file (on workstation)
 		with open(os.path.join(self.workstation_runfolder, self.output_file), 'w') as outputfile:
@@ -308,7 +318,7 @@ class Sequencer_Integrity_Check():
 			else:
 				# record that it passed with the number of hours it took
 				outputfile.write(config.checksum_match +" after "+ str(count) + " hours\n")
-		
+
 			if config.nextseq:
 				# record the checksums
 				outputfile.write("workstation checksum (" + self.workstation_runfolder + ")=" + self.checksum_results["workstation_checksum"] + "\n")
@@ -318,62 +328,104 @@ class Sequencer_Integrity_Check():
 					# record the checksums
 					outputfile.write("workstation checksum (" + self.workstation_runfolder + "/" + directory +")=" + self.checksum_results["workstation"][directory] + "\n")
 					outputfile.write("sequencer checksum (" + self.sequencer_runfolder + "/" + directory + ")=" + self.checksum_results["sequencer"][directory] + "\n")
-			# if failing integrity check, and it's a nextseq run call function to identify any files which differ between output and temp
-			if not self.checksum_match and config.nextseq:	
-				self.identify_missing_files_nextseq()
+			# if failing integrity check, call function to identify any files which differ between output and temp
+			if not self.checksum_match:
+				self.identify_missing_files()
 
-		
-
-	def identify_missing_files_nextseq(self):
+	def identify_missing_files(self):
 		"""
-		Loop through the temp folder and if there are any files NOT on the workstation identify them.
+		Loop through runfolder, or subfolders to identify where there are files on the sequencer that are not on the workstation.
 		Then repeat in other direction - looking for any files on workstation that aren't on the sequencer
 		"""
 		#create output file
 		with open(os.path.join(self.workstation_runfolder, config.missing_files_output), 'w') as outputfile:
+			if config.nextseq:
+				# set flag so header only reported first time
+				workstation_missing = False
+				# loop through the tempfolder
+				for root, subfolder, files in os.walk(os.path.join(self.sequencer_temp_folder, self.runfolder)):
+					# for each file in the list of files in that folder
+					for file in files:
+						# set the path of each file
+						path = os.path.join(root,file)
+						# create the equivelant path on the workstation
+						ws_path = path.replace(self.sequencer_temp_folder,self.mapped_workstation_folder)
+						# if the file doesn't exist and it's not a file already identified as not expected on both folders
+						if not os.path.isfile(ws_path) and file not in config.exclude:
+							# if it's the first missing file we've seen
+							if not workstation_missing:
+								# print header message
+								outputfile.write("Missing from Workstation:\n")
+								# set flag so not printed again
+								workstation_missing = True
+							# print the path to the extra file
+							outputfile.write(path)
 
-	  # set flag so header only reported first time
-			workstation_missing = False
-			# loop through the tempfolder
-			for root, subfolder, files in os.walk(os.path.join(self.sequencer_temp_folder, self.runfolder)):
-				# for each file in the list of files in that folder
-				for file in files:
-					# set the path of each file
-					path = os.path.join(root,file)
-					# create the equivelant path on the workstation
-					ws_path = path.replace(self.sequencer_temp_folder,self.mapped_workstation_folder)
-					# if the file doesn't exist and it's not a file already identified as not expected on both folders
-					if not os.path.isfile(ws_path) and file not in config.exclude:
-						# if it's the first missing file we've seen 
-						if not workstation_missing:
-							# print header message
-							outputfile.write("Missing from Workstation\n")
-							# set flag so not printed again
-							workstation_missing = True
-						# print the path to the extra file
-						outputfile.write(path)
-	  
-	  		# repeat looking for files on workstation that aren't on sequencer
-			sequencer_missing = False
-			# loop through all files on workstation runfolder 
-			for root, subfolder, files in os.walk(os.path.join(self.mapped_workstation_folder,self.runfolder)):
-				# for each file
-				for file in files:
-					# set path on workstation
-					path = os.path.join(root,file)
-					# replace the path on workstation with the expected sequencer path
-					sequencer_file_path = path.replace(self.mapped_workstation_folder, self.sequencer_temp_folder)
-					# if this file doesn't exist
-					if not os.path.isfile(sequencer_file_path) and file not in config.exclude:
-						# check if header not already printed
-						if not sequencer_missing:
-							# print header
-							outputfile.write("missing from sequencer")
-							# set flag so not printed again
-							sequencer_missing = True
-						# print the path to the extra file
-						outputfile.write(path)
-			  
+				# repeat looking for files on workstation that aren't on sequencer
+				sequencer_missing = False
+				# loop through all files on workstation runfolder
+				for root, subfolder, files in os.walk(os.path.join(self.mapped_workstation_folder,self.runfolder)):
+					# for each file
+					for file in files:
+						# set path on workstation
+						path = os.path.join(root,file)
+						# replace the path on workstation with the expected sequencer path
+						sequencer_file_path = path.replace(self.mapped_workstation_folder, self.sequencer_temp_folder)
+						# if this file doesn't exist
+						if not os.path.isfile(sequencer_file_path) and file not in config.exclude:
+							# check if header not already printed
+							if not sequencer_missing:
+								# print header
+								outputfile.write("Missing from Sequencer:\n")
+								# set flag so not printed again
+								sequencer_missing = True
+							# print the path to the extra file
+							outputfile.write(path)
+			# on Novaseq repeat for the relevant subfolders
+			if config.novaseq:
+				for folder in config.include:
+					# set flag so header only reported first time
+					workstation_missing = False
+					# loop through the tempfolder
+					for root, subfolder, files in os.walk(os.path.join(self.sequencer_temp_folder, self.runfolder, folder)):
+						# for each file in the list of files in that folder
+						for file in files:
+							# set the path of each file
+							path = os.path.join(root,file)
+							# create the equivelant path on the workstation
+							ws_path = path.replace(self.sequencer_temp_folder,self.mapped_workstation_folder)
+							# if the file doesn't exist and it's not a file already identified as not expected on both folders
+							if not os.path.isfile(ws_path) and file not in config.exclude:
+								# if it's the first missing file we've seen
+								if not workstation_missing:
+									# print header message
+									outputfile.write("Missing from Workstation\n")
+									# set flag so not printed again
+									workstation_missing = True
+								# print the path to the extra file
+								outputfile.write(path)
+								
+					# repeat looking for files on workstation that aren't on sequencer
+					sequencer_missing = False
+					# loop through all files on workstation runfolder
+					for root, subfolder, files in os.walk(os.path.join(self.mapped_workstation_folder,self.runfolder, folder)):
+						# for each file
+						for file in files:
+							# set path on workstation
+							path = os.path.join(root,file)
+							# replace the path on workstation with the expected sequencer path
+							sequencer_file_path = path.replace(self.mapped_workstation_folder, self.sequencer_temp_folder)
+							# if this file doesn't exist
+							if not os.path.isfile(sequencer_file_path) and file not in config.exclude:
+								# check if header not already printed
+								if not sequencer_missing:
+									# print header
+									outputfile.write("Missing from Sequencer:\n")
+									# set flag so not printed again
+									sequencer_missing = True
+								# print the path to the extra file
+								outputfile.write(path)
+
 
 def main():
 	md5=Sequencer_Integrity_Check()
@@ -390,6 +442,6 @@ def main():
 
 	# start integrity checking
 	md5.look_for_folder()
-	
+
 if __name__ =="__main__":
 	main()
