@@ -22,10 +22,14 @@ To run in debug mode provide the --debug command line option.
 
 Running in debug mode will simulate an integrity check, using data stored within this repository. It will simulate a failed test and then a passed test.
 
-Running in debug mode uses the workstation and sequencer_temp folders in the testing_data folder as mock runfolders. These folders contain quite a few files but checksums are calculated quickly. 
-The script moves files out of the workstation run folder (moved files are specified in the config script config.files_to_move) which should cause the integrity check to fail - NB at this stage the checksums are printed to stdout, the result is not displayed in the pop up box. The script waits 30 seconds and then moves the file(s) back which should then result in a successful test (checksums printed to stdout, but this time the popup box will display successful test and script will finish).
+Running in debug mode uses the workstation and sequencer_temp folders in the testing_data folder as mock runfolders. As of v25 the setup of the test structures is more robust.
+These folders contain quite a few files but checksums are calculated quickly. 
+The script moves files out of the workstation run folder (moved files are specified in the config script config.files_to_move) which should cause the integrity check to fail - NB at this stage the checksums are printed to stdout, the result is not displayed in the pop up box. The script waits a short while and then moves the file(s) back which should then result in a successful test (checksums printed to stdout, but this time the popup box will display successful test and script will finish).
 
 When performing testing ensure the checksums are different first time around, and then are the same when the test passes. Any errors will need further debugging.
+
+### verbose
+In addition to --debug and extra command --verbose can be used which prints some commands/steps applied to perform the tests. These may hide useful outputs so these are only printed when the --verbose flag is given.
 
 ### no_min_wait
 The flag --no_min_wait can be provided to skip the first wait before ther checksums are calculated. This is useful when restarting after a failed integrity check.

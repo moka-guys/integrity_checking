@@ -19,7 +19,7 @@ integrity_check_first_wait = 0.5
 # hours between integrity checks
 integrity_check_repeat_wait = 0.5
 # maximum number of times to perform integrity test
-max_number_of_attempts = 12
+max_number_of_attempts = 5
 # list of files which differ between temp and output
 missing_files_output = "missing_files.txt"
 
