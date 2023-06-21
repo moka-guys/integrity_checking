@@ -41,6 +41,7 @@ class Sequencer_Integrity_Check():
 
 		# variable to hold debug status
 		self.debug = False
+		self.verbose = False
 
 		# flag to override the minimum wait
 		self.no_min_wait = False
@@ -51,27 +52,37 @@ class Sequencer_Integrity_Check():
 	def debug_mode(self):
 		# if testing, overwrite the paths to that of the testing folders 
 		if self.debug:
-			print "debug on"
+			print "debug on. Setting up test runfolders so integrity check fails"
 			# example run folders that can be used to test the script are within this repo. However to enable this to be tested on multiple machines need to capture the path to this script.
 			self.mapped_drive = os.path.dirname(os.path.realpath(__file__))
 			# path to the fake nextseqtemp folder
-			self.sequencer_temp_folder = self.mapped_drive + "\\testing_data\\sequencer_temp"
+			self.sequencer_temp_folder = os.path.join(self.mapped_drive,"testing_data","sequencer_temp")
 			# path to the fake workstation folder
-			self.mapped_workstation_folder = self.mapped_drive + "\\testing_data\\workstation"
+			self.mapped_workstation_folder = os.path.join(self.mapped_drive,"testing_data","workstation")
 			# path to the fake checksums_inprogress folder
-			self.checksum_in_progress = self.mapped_drive + "\\testing_data\\checksums_inprogress"	
+			self.checksum_in_progress = os.path.join(self.mapped_drive,"testing_data","checksums_inprogress")
 			# path to the fake run in progress folder
-			self.run_in_progress = self.mapped_drive + "\\testing_data\\run_inprogress"
-
+			self.run_in_progress = os.path.join(self.mapped_drive,"testing_data","run_inprogress")
+			
+			# set up test environment:
 			# move files out of folder to make integrity test fail
-			for file in config.files_to_move:
-				if config.nextseq:
-					print "moving " + self.mapped_drive + "\\testing_data\\workstation\\run100\\" + file + " to " +  self.mapped_drive + "\\testing_data\\workstation\\" + file
-					os.rename(self.mapped_drive + "\\testing_data\\workstation\\run100\\" + file, self.mapped_drive + "\\testing_data\\workstation\\" + file)
-				elif config.novaseq:
-					for dir in config.include:
-						print "moving " + self.mapped_drive + "\\testing_data\\workstation\\run100\\" + dir + "\\" + file + " to " +  self.mapped_drive + "\\testing_data\\workstation\\" + dir + "_temp\\"  + file
-						os.rename(self.mapped_drive + "\\testing_data\\workstation\\run100\\" + dir + "\\" + file, self.mapped_drive + "\\testing_data\\workstation\\" + dir + "_temp\\" + file)
+			if config.nextseq:
+				temp_dir_path=os.path.join(self.mapped_drive,"testing_data","workstation","run100_temp")
+				if not os.path.exists(temp_dir_path):
+						os.mkdir(temp_dir_path)
+				file_to_move=os.listdir(os.path.join(self.mapped_drive,"testing_data","workstation","run100"))[0]
+				if self.verbose:
+					print "moving %s to %s" %(os.path.join(self.mapped_drive,"testing_data","workstation","run100",file_to_move), os.path.join(temp_dir_path,file_to_move))
+				os.rename(os.path.join(self.mapped_drive,"testing_data","workstation","run100",file_to_move), os.path.join(temp_dir_path,file_to_move))
+			elif config.novaseq:
+				for dir in config.include:
+					temp_dir_path=os.path.join(self.mapped_drive,"testing_data","workstation",dir + "_temp")
+					if not os.path.exists(temp_dir_path):
+						os.mkdir(temp_dir_path)
+					file_to_move=os.listdir(os.path.join(self.mapped_drive,"testing_data","workstation","run100", dir))[0]
+					if self.verbose:
+						print "moving %s to %s" % (os.path.join(self.mapped_drive,"testing_data","workstation","run100", dir, file_to_move),os.path.join(temp_dir_path, file_to_move))
+					os.rename(os.path.join(self.mapped_drive,"testing_data","workstation","run100", dir, file_to_move),os.path.join(temp_dir_path, file_to_move))
 
 	def look_for_folder(self):
 		"""
@@ -163,7 +174,7 @@ class Sequencer_Integrity_Check():
 		while not finished:
 			# check the run has finished and transferred (presence of RTA_complete in the runfolder and on workstation)
 			if self.RTA_complete in os.listdir(self.sequencer_runfolder) and self.RTA_complete in os.listdir(self.workstation_runfolder):
-					print self.no_min_wait
+					print "no min wait = %s" % self.no_min_wait
 					# if it's a testing run print a message
 					if self.debug:
 						print "debug mode - skipping integrity_check_first_wait"
@@ -198,7 +209,8 @@ class Sequencer_Integrity_Check():
 		This function checks the runfolder has not already been checksummed, marks the folder as being checksummed and then calls the function to generate the checksums.
 		"""
 		if self.debug:
-			print "in prepare_checksum_calculations"
+			if self.verbose:
+				print "in prepare_checksum_calculations"
 
 		# create name for file to denote checksum in progress
 		checksum_in_progress_file = self.runfolder+".txt"
@@ -236,8 +248,6 @@ class Sequencer_Integrity_Check():
 		The nextseq compares the entire folder, but excludes specific files which are not copied from temp to output.
 		The checksums are written to a file on the workstation for the demultiplexing script to read from.
 		"""
-		if self.debug:
-			print "starting integrity checking"
 
 		print "starting integrity checking"
 		# set a count for max number of attempts at checksum (one test per hour)
@@ -271,7 +281,7 @@ class Sequencer_Integrity_Check():
 					# calculate the md5 checksum
 					self.checksum_results["workstation"][directory] = dirhash(os.path.join(self.workstation_runfolder,directory), 'md5') 
 					self.checksum_results["sequencer"][directory] = dirhash(os.path.join(self.sequencer_runfolder,directory), 'md5')
-					print self.checksum_results
+				print self.checksum_results
 
 				# for the sub folder tested - check each match and count number of successful matches
 				matches = 0
@@ -291,20 +301,23 @@ class Sequencer_Integrity_Check():
 				count += 1
 				# if testing skip the wait
 				if self.debug:
-					print "moving files back into workstation runfolder. Integrity test will be repeated in 30 seconds..."
+					print "CHECKSUM FAIL\nmoving files back into workstation runfolder. Integrity test will be repeated shortly..."
 					# move files back into folder to make integrity test pass
 					if config.nextseq:
-						for file in config.files_to_move:
-							print "moving " + self.mapped_drive + "\\testing_data\\workstation\\" + file + " to " + self.mapped_drive + "\\testing_data\\workstation\\run100\\" + file
-							os.rename(self.mapped_drive + "\\testing_data\\workstation\\" + file, self.mapped_drive + "\\testing_data\\workstation\\run100\\" + file)
+						temp_dir_path=os.path.join(self.mapped_drive,"testing_data","workstation","run100_temp")
+						file_to_move=os.listdir(temp_dir_path)[0]
+						if self.verbose:
+							print "moving %s to %s" % (os.path.join(temp_dir_path,file_to_move),os.path.join(self.mapped_drive,"testing_data","workstation","run100",file_to_move))
+						os.rename(os.path.join(temp_dir_path,file_to_move),os.path.join(self.mapped_drive,"testing_data","workstation","run100",file_to_move))
 					elif config.novaseq:
 						# move files back into folder to make integrity test pass
 						for dir in config.include:
-							for file in config.files_to_move:
-								print "moving " + self.mapped_drive + "\\testing_data\\workstation\\" + dir + "_temp\\" +  file + " to " + self.mapped_drive + "\\testing_data\\workstation\\run100\\" + dir + "\\" + file
-								os.rename(self.mapped_drive + "\\testing_data\\workstation\\" + dir + "_temp\\" + file, self.mapped_drive + "\\testing_data\\workstation\\run100\\" + dir + "\\" + file)
-						time.sleep(20)
-						count = config.max_number_of_attempts - 1
+							file_to_move=os.listdir(os.path.join(self.mapped_drive,"testing_data","workstation",dir+"_temp"))[0]
+							if self.verbose:
+								print "moving %s to %s" % (os.path.join(self.mapped_drive,"testing_data","workstation",dir+"_temp", file_to_move), os.path.join(self.mapped_drive,"testing_data","workstation","run100",dir,file_to_move))
+							os.rename(os.path.join(self.mapped_drive,"testing_data","workstation",dir+"_temp", file_to_move),os.path.join(self.mapped_drive,"testing_data","workstation","run100",dir,file_to_move))
+					time.sleep(10)
+					count = config.max_number_of_attempts - 1
 				else:
 					# wait the number of hours defined in config file
 					time.sleep(config.integrity_check_repeat_wait * 3600)
@@ -433,10 +446,12 @@ def main():
 	parser = argparse.ArgumentParser()
 	# add debug argument which is set to true if argument given.
 	parser.add_argument('--debug', action='store_true', help="Turn debug mode on.")
+	parser.add_argument('--verbose', action='store_true', help="print extra when in debug.")
 	parser.add_argument('--no_min_wait', action='store_true', help="skips any minimum wait before calculating checksum.")
 	md5.no_min_wait = parser.parse_args().no_min_wait
 	# parse arguments and set debug variable in class to debug
 	md5.debug = parser.parse_args().debug
+	md5.verbose = parser.parse_args().verbose
 	# set debug paths
 	md5.debug_mode()
 

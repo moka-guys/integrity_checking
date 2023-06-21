@@ -5,7 +5,7 @@ Variables defined in this module are required by sequencer_checksum.py.
 """
 
 # ===== git release for the github repo =====
-script_release = "v24.0"
+script_release = "v25.0.0"
 
 # ===== Integrity check =====
 # the filename which holds the checksum results
@@ -24,11 +24,11 @@ max_number_of_attempts = 12
 missing_files_output = "missing_files.txt"
 
 # ===== Platform specific settings =====
-novaseq = True
-nextseq = False
+novaseq = False
+nextseq = True
 
 # list of files to exclude from the checksum calculation the 
-exclude = ["IndexMetricsOut.bin", "RTAStart.bat", "CorrectedIntMetrics.bin", "EmpiricalPhasingMetrics.bin", "ErrorMetrics.bin", "EventMetrics.bin", "ExtractionMetrics.bin", "PFGridMetrics.bin", "QMetrics.bin", "RegistrationMetrics.bin", "TileMetrics.bin", "AlignmentMetrics.bin", "BasecallingMetrics.bin", "ExtendedTileMetrics.bin", "FWHMGridMetrics.bin", "ImageMetrics.bin", "QGridMetrics.bin", "000_000_000_na_rtabat.trans", "FilesAdded.csv", "FilesCopied.csv", "demultiplexlog.txt", "DNANexus_upload_started.txt", "CopyComplete.txt", "md5checksum.txt", missing_files_output]
+exclude = ["IndexMetricsOut.bin", "RTAStart.bat", "CorrectedIntMetrics.bin", "EmpiricalPhasingMetrics.bin", "ErrorMetrics.bin", "EventMetrics.bin", "ExtractionMetrics.bin", "PFGridMetrics.bin", "QMetrics.bin", "RegistrationMetrics.bin", "TileMetrics.bin", "AlignmentMetrics.bin", "BasecallingMetrics.bin", "ExtendedTileMetrics.bin", "FWHMGridMetrics.bin", "ImageMetrics.bin", "QGridMetrics.bin", "000_000_000_na_rtabat.trans", "FilesAdded.csv", "FilesCopied.csv", "demultiplexlog.txt", "DNANexus_upload_started.txt", "CopyComplete.txt","bcl2fastq2_output.log", "md5checksum.txt", missing_files_output]
 
 if nextseq:
     # files to exclude from integrity check
