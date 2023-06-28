@@ -119,14 +119,14 @@ class Sequencer_Integrity_Check():
 					root = Tkinter.Tk()
 					# hide
 					root.withdraw()
-					tkMessageBox.showinfo("Integrity check complete","Integrity check passed")
+					tkMessageBox.showinfo("%s Integrity check complete" % self.runfolder,"Integrity check passed" )
 					# if checksums don't match (integrity test FAIL) return a error box
 				else:
 					# create root window which can then be hidden
 					root = Tkinter.Tk()
 					# hide
 					root.withdraw()
-					tkMessageBox.showerror("Integrity check complete","Integrity check failed - please do not use this sequencer and inform the Bioinformatics team immediately")
+					tkMessageBox.showerror("%s Integrity check complete" % self.runfolder,"Integrity check failed - please do not use this sequencer and inform the Bioinformatics team immediately" )
 
 
 	def open_window(self):

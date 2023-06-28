@@ -5,7 +5,7 @@ Variables defined in this module are required by sequencer_checksum.py.
 """
 
 # ===== git release for the github repo =====
-script_release = "v25.0.0"
+script_release = "v25.0.1"
 
 # ===== Integrity check =====
 # the filename which holds the checksum results
@@ -38,7 +38,3 @@ elif novaseq:
     include = ["InterOp","Thumbnail_Images","Data"]
     sequencer_temp_folder = "Z:\\outputfolder"
     mapped_workstation_folder = "Y:\\"
-# ===== Testing =====
-# files to move as part of automated testing
-files_to_move = ["RunInfo.xml"]
-
