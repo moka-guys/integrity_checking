@@ -5,7 +5,7 @@ Variables defined in this module are required by sequencer_checksum.py.
 """
 
 # ===== git release for the github repo =====
-script_release = "v25.0.1"
+script_release = "v25.1.0"
 
 # ===== Integrity check =====
 # the filename which holds the checksum results
