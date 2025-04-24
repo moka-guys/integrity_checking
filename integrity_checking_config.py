@@ -28,7 +28,7 @@ novaseq = False
 nextseq = True
 
 # list of files to exclude from the checksum calculation the 
-exclude = ["IndexMetricsOut.bin", "RTAStart.bat", "CorrectedIntMetrics.bin", "EmpiricalPhasingMetrics.bin", "ErrorMetrics.bin", "EventMetrics.bin", "ExtractionMetrics.bin", "PFGridMetrics.bin", "QMetrics.bin", "RegistrationMetrics.bin", "TileMetrics.bin", "AlignmentMetrics.bin", "BasecallingMetrics.bin", "ExtendedTileMetrics.bin", "FWHMGridMetrics.bin", "ImageMetrics.bin", "QGridMetrics.bin", "000_000_000_na_rtabat.trans", "FilesAdded.csv", "FilesCopied.csv", "demultiplexlog.txt", "DNANexus_upload_started.txt", "CopyComplete.txt","bcl2fastq2_output.log", "md5checksum.txt", "sscheck_flagfile.txt", missing_files_output]
+exclude = ["IndexMetricsOut.bin", "RTAStart.bat", "CorrectedIntMetrics.bin", "EmpiricalPhasingMetrics.bin", "ErrorMetrics.bin", "EventMetrics.bin", "ExtractionMetrics.bin", "PFGridMetrics.bin", "QMetrics.bin", "RegistrationMetrics.bin", "TileMetrics.bin", "AlignmentMetrics.bin", "BasecallingMetrics.bin", "ExtendedTileMetrics.bin", "FWHMGridMetrics.bin", "ImageMetrics.bin", "QGridMetrics.bin", "000_000_000_na_rtabat.trans", "FilesAdded.csv", "FilesCopied.csv", "demultiplexlog.txt", "DNANexus_upload_started.txt", "CopyComplete.txt","bcl2fastq2_output.log", "md5checksum.txt", "sscheck_flagfile.txt", "initial_sscheck_flagfile.txt", missing_files_output]
 
 if nextseq:
     # files to exclude from integrity check
