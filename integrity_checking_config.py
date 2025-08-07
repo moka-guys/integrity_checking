@@ -33,8 +33,8 @@ exclude = ["IndexMetricsOut.bin", "RTAStart.bat", "CorrectedIntMetrics.bin", "Em
 if nextseq:
     # files to exclude from integrity check
     sequencer_temp_folder = "D:\\Illumina\\NextSeq Control Software Temp"
-    mapped_workstation_folder = "Z:\\"
+    mapped_workstation_folder = "Y:\\"
 elif novaseq:
     include = ["InterOp","Thumbnail_Images","Data"]
     sequencer_temp_folder = "Z:\\outputfolder"
-    mapped_workstation_folder = "Y:\\"
+    mapped_workstation_folder = "X:\\"
