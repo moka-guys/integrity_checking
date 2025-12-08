@@ -1,7 +1,7 @@
 # integrity_check.py – Run Completeness Verification Script
 
 `integrity_check.py` is a new, single source of truth script for validating the presence of expected file content within Illumina (NovaSeq & NextSeq) runfolders. It replaces the older checksum-based helpers and is
-designed to be used in combination with Server Message block signing to ensure data integrity after files are transferred from remote sequencer workstations to the local bioinformatics workstations.
+designed to be used in combination with Server Message Block signing in existing Samba shares to ensure data integrity after files are transferred from remote sequencer workstations to the local bioinformatics workstations.
 
 ## Requirements
 
