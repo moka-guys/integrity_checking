@@ -207,8 +207,9 @@ class RunVerifier:
 
         cycle_pattern = re.compile(r"^C(\d+)\.")
         flat_bcl_pattern = re.compile(r"^(\d+)\.bcl", re.IGNORECASE)
-        lane_tiles_map = self._load_tiles_from_runinfo(lanes)
-        # Tiles from RunInfo let us infer CBCL filenames even if the filesystem lacks an example.
+        lane_tiles_map: Optional[Dict[str, List[str]]] = None
+        # RunInfo parsing is deferred until we actually need it so we can tailor how the tile
+        # information is used (e.g., validation-only for CBCL layouts).
 
         lane_layouts: List[LaneLayout] = []
 
@@ -293,13 +294,20 @@ class RunVerifier:
             if cbcl_files:
                 print(f"   Lane {lane}: {len(cbcl_files)} .cbcl files discovered in {cbcl_cycle_hint} (e.g., {cbcl_files[0]})")
             else:
+                if lane_tiles_map is None:
+                    lane_tiles_map = self._load_tiles_from_runinfo(
+                        lanes, require_tile_filenames=False
+                    )
                 lane_tiles = lane_tiles_map.get(lane, [])
                 if not lane_tiles:
                     print(f"Error: Unable to determine expected .cbcl files for {lane}", file=sys.stderr)
                     sys.exit(1)
 
-                cbcl_files = [f"{tile}.bcl.cbcl" for tile in lane_tiles]
-                print(f"   Lane {lane}: {len(cbcl_files)} tiles defined in RunInfo.xml (e.g., {lane_tiles[0]})")
+                cbcl_files = [f"{lane}_1.cbcl", f"{lane}_2.cbcl"]
+                print(
+                    f"   Lane {lane}: no .cbcl files discovered; assuming surface-level naming"
+                    f" (e.g., {cbcl_files[0]}) based on RunInfo.xml validation"
+                )
 
             lane_layouts.append(
                 LaneLayout(
@@ -331,8 +339,14 @@ class RunVerifier:
                 return lane_map[lane_number]
         return None
 
-    def _load_tiles_from_runinfo(self, lanes: List[str]) -> Dict[str, List[str]]:
-        """Parse RunInfo.xml and build a mapping of lane name -> list of tile ids."""
+    def _load_tiles_from_runinfo(
+        self, lanes: List[str], require_tile_filenames: bool = True
+    ) -> Dict[str, List[str]]:
+        """Parse RunInfo.xml and build a mapping of lane name -> list of tile ids.
+
+        When require_tile_filenames is False we only validate that tiles exist for each lane
+        and return placeholder entries instead of actual tile identifiers.
+        """
         run_info_path = os.path.join(self.run_folder_path, "RunInfo.xml")
         try:
             tree = ET.parse(run_info_path)
@@ -385,6 +399,8 @@ class RunVerifier:
                 print(f"Error: No tile entries mapped to lane {lane} in RunInfo.xml", file=sys.stderr)
                 sys.exit(1)
             lane_tiles[lane].sort()
+            if not require_tile_filenames:
+                lane_tiles[lane] = ["RunInfoTilesValidated"]
 
         return lane_tiles
 
