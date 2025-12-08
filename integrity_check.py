@@ -159,7 +159,7 @@ class RunVerifier:
             }
 
             if any(value == 0 for value in run_params.values()):
-                # Older instruments sometimes only populate the <Reads> block, so fall back to it.
+                # Older instrument setups sometimes only populate the <Reads> block, so fall back to it.
                 fallback_reads = parse_reads_block()
                 for key in run_params:
                     if run_params[key] == 0 and fallback_reads.get(key, 0):

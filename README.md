@@ -12,6 +12,96 @@ designed to be used in combination with Server Message Block signing in existing
 
 No additional packages or configuration files are needed.
 
+## How it works
+
+```mermaid
+flowchart TD
+    %% Node Definitions
+    Start(["Start Script"])
+    ArgCheck{"Run Folder Exists?"}
+    InitLog["Init TeeStream<br>Capture stdout/stderr to buffer"]
+
+    subgraph Phase_1 [Phase 1: Critical Setup]
+        direction TB
+        CheckRunInfo{"RunInfo.xml<br>Exists & > 0 bytes?"}
+        ParseParams["Parse RunParameters.xml<br>Get Cycle Counts R1/I1/I2/R2"]
+        DiscLayout["Discover Layout<br>Scan BaseCalls Folder"]
+    end
+
+    subgraph Phase_2 [Phase 2: Root Artifacts]
+        direction TB
+        CheckArtifacts["Check Root Files:<br>1. CopyComplete.txt<br>2. RTAComplete.txt<br>3. InterOp/ *.bin<br>4. Logs/ dir"]
+        RecArtErr["Record Missing Files"]
+    end
+
+    subgraph Phase_3 [Phase 3: Lane Verification Loop]
+        direction TB
+        LaneLoop{"Next Lane?"}
+        CheckFilters{"Check .filter files"}
+        LayoutType{"Layout Type?"}
+
+        subgraph CBCL_Check [Cycle Directories]
+            IterCycles["Iterate Cycles 1..N"]
+            CheckDir{"Dir Cxx.1 Exists?"}
+            CheckCBCL{"File .cbcl Exists<br>& > 0 bytes?"}
+        end
+
+        subgraph Flat_Check [Flat BCL Files]
+            IterFlat["Iterate Cycles"]
+            CheckBCL{"File .bcl Exists<br>& > 0 bytes?"}
+        end
+
+        RecLaneErr["Record Missing Files"]
+        CheckLimit{"Max Errors > 100?"}
+    end
+
+    Report["Print Summary"]
+    WriteFile["Write buffer to<br>filecheck.txt"]
+    End(["End"])
+    Fatal["sys.exit(1)"]
+
+    %% Connections
+    Start --> ArgCheck
+    ArgCheck -- No --> Fatal
+    ArgCheck -- Yes --> InitLog --> CheckRunInfo
+
+    CheckRunInfo -- No --> Fatal
+    CheckRunInfo -- Yes --> ParseParams --> DiscLayout --> CheckArtifacts
+
+    CheckArtifacts -- If Missing --> RecArtErr --> LaneLoop
+    CheckArtifacts -- OK --> LaneLoop
+
+    LaneLoop -- No Lanes Left --> Report
+    LaneLoop -- Yes --> CheckFilters
+
+    CheckFilters -- If Missing --> RecLaneErr
+    CheckFilters -- OK --> LayoutType
+
+    LayoutType -- "cycle_dirs" --> IterCycles
+    LayoutType -- "flat" --> IterFlat
+
+    IterCycles --> CheckDir
+    CheckDir -- No --> RecLaneErr --> CheckLimit
+    CheckDir -- Yes --> CheckCBCL
+    CheckCBCL -- Fail --> RecLaneErr --> CheckLimit
+    CheckCBCL -- Pass --> IterCycles
+
+    IterFlat --> CheckBCL
+    CheckBCL -- Fail --> RecLaneErr --> CheckLimit
+    CheckBCL -- Pass --> IterFlat
+
+    CheckLimit -- Yes (Abort Loop) --> Report
+    CheckLimit -- No (Continue) --> LaneLoop
+
+    Report --> WriteFile --> End
+
+    %% Styling
+    style Fatal fill:#ffcccc,stroke:#cc0000,stroke-width:2px
+    style Phase_1 fill:#e1f5fe,stroke:#01579b,stroke-dasharray: 5 5
+    style Phase_3 fill:#f3e5f5,stroke:#4a148c,stroke-dasharray: 5 5
+    style CheckLimit fill:#fff9c4,stroke:#fbc02d
+```
+
 ## Quick start
 
 ```bash
